@@ -1,0 +1,34 @@
+---
+version: '3'
+services:
+        lm-user-service:
+                build: ../../lm-user-service/
+                image: lm-user-service:v1
+                container_name: lm-user-service
+                volumes:
+                        - "../../lm-user-service/.m2:/root/.m2"
+                        - "../../lm-user-service/pom.xml:/usr/src/lm/pom.xml"
+                        - "../../lm-user-service/src/:/usr/src/lm/src/"
+                working_dir: /usr/src/lm
+                command: /bin/bash -c "mvn clean package -Dmaven.test.skip && java -jar target/lm-user-service.jar"
+                ports:
+                        - "7001:8080"
+                depends_on:
+                        - user-db
+                        - zipkin-server
+        user-db:
+                build: ../../lm-user-service/dev-scripts/db/
+                image: user-db:v1
+                container_name: user-db
+                ports:
+                        - "3306:3306"
+                environment:
+                        - MYSQL_ROOT_PASSWORD=password
+                        - MYSQL_DATABASE=lm_user_db
+                volumes:
+                        - "user-db-data:/var/lib/mysql"
+        zipkin-server:
+                image: openzipkin/zipkin:2
+                container_name: zipkin-server
+volumes:
+        user-db-data:

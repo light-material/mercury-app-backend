@@ -10,7 +10,7 @@ services:
                         - "../../user-service/pom.xml:/usr/src/lm/pom.xml"
                         - "../../user-service/src/:/usr/src/lm/src/"
                 working_dir: /usr/src/lm
-                command: /bin/bash -c "mvn clean package -Dmaven.test.skip && java -jar target/user-service.jar"
+                command: /bin/bash -c "mvn clean package && java -jar target/user-service.jar"
                 ports:
                         - "7001:8080"
                 depends_on:

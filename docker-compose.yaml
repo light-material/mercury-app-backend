@@ -1,6 +1,17 @@
 ---
 version: '3'
 services:
+        mercury-db:
+                build: ./dev-scripts/db/
+                image: mercury-db:v1
+                container_name: mercury-db
+                ports:
+                        - "3307:3306"
+                environment:
+                        - MYSQL_ROOT_PASSWORD=password
+                        - MYSQL_DATABASE=mercury_db
+                volumes:
+                        - "mercury-db-data:/var/lib/mysql"
         user-service:
                 build: ../../user-service/
                 image: user-service:v1
@@ -34,3 +45,4 @@ services:
                         - "9411:9411"
 volumes:
         user-db-data:
+        mercury-db-data:

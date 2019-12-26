@@ -1,0 +1,48 @@
+---
+version: '3'
+services:
+        mercury-db:
+                build: ./dev-scripts/db/
+                image: mercury-db:v1
+                container_name: mercury-db
+                ports:
+                        - "3307:3306"
+                environment:
+                        - MYSQL_ROOT_PASSWORD=password
+                        - MYSQL_DATABASE=mercury_db
+                volumes:
+                        - "mercury-db-data:/var/lib/mysql"
+        user-service:
+                build: ../../user-service/
+                image: user-service:v1
+                container_name: user-service
+                volumes:
+                        - "../../user-service/.m2:/root/.m2"
+                        - "../../user-service/pom.xml:/usr/src/lm/pom.xml"
+                        - "../../user-service/src/:/usr/src/lm/src/"
+                working_dir: /usr/src/lm
+                command: /bin/bash -c "mvn clean package && java -jar target/user-service.jar"
+                ports:
+                        - "7001:8080"
+                depends_on:
+                        - user-db
+                        - zipkin-server
+        user-db:
+                build: ../../user-service/dev-scripts/db/
+                image: user-db:v1
+                container_name: user-db
+                ports:
+                        - "3306:3306"
+                environment:
+                        - MYSQL_ROOT_PASSWORD=password
+                        - MYSQL_DATABASE=lm_user_db
+                volumes:
+                        - "user-db-data:/var/lib/mysql"
+        zipkin-server:
+                image: openzipkin/zipkin:2
+                container_name: zipkin-server
+                ports:
+                        - "9411:9411"
+volumes:
+        user-db-data:
+        mercury-db-data:
